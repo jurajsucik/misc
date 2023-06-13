@@ -12,17 +12,19 @@ foreach ($drive in $drives) {
     # Iterate through each file
     foreach ($file in $files) {
         # Calculate MD5 hash for the current file
-        $md5 = New-Object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
-        $hash = [System.BitConverter]::ToString($md5.ComputeHash([System.IO.File]::ReadAllBytes($file.FullName)))
+        $hashObj = Get-FileHash -Path $file.FullName -Algorithm MD5  
 
         # Create a custom object to store the file path, name, and MD5 hash
         $result = New-Object -TypeName PSObject -Property @{
             FilePath = $file.DirectoryName
             FileName = $file.Name
-            MD5Hash  = $hash
+            MD5Hash  = $hashObj.Hash  
         }
 
         # Add the custom object to the results array
         $results += $result
     }
 }
+
+# Export the results to a CSV file
+$results | Export-Csv -Path "MD5HashResults.csv" -NoTypeInformation
